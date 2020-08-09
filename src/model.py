@@ -17,16 +17,19 @@ class TrainData(Dataset):
         data = pd.read_excel(xlsx_file)
         data = np.array(data)
         data = np.delete(data, -2, 1)
-        self.data = data.astype('float32')
+        self.features = data[::,:-1:].astype('float32')
+        self.target = data[::,-1].astype('int64')
 
     def __len__(self):
-        return len(self.data)
+        return len(self.features)
     
     def __getitem__(self, idx):
-        sample = {'features': self.data[::,:-1:], 'target': self.data[::,-1]}
+        sample = {'features': self.features[idx], 'target': self.target[idx]}
+        # print(np.shape(sample['features']), np.shape(sample['target']))
+        # print("===")
         return sample
 
-batch_size = 100
+batch_size = 1
 
 train_dataset = TrainData(xlsx_file='../original-data/Training-Data.xlsx')
 trainloader = DataLoader(dataset=train_dataset, batch_size=batch_size, shuffle=True)
@@ -57,18 +60,11 @@ class Net(nn.Module):
         x = torch.sigmoid(self.fc3(x))
         return x
 
-    def num_flat_features(self, x):
-        size = x.size()[1:]  # all dimensions except the batch dimension
-        num_features = 1
-        for s in size:
-            num_features *= s
-        return num_features
-
 net = Net()
 criterion = nn.CrossEntropyLoss()
-optimizer = optim.SGD(net.parameters(), lr=0.001, momentum=0.9)
+optimizer = optim.SGD(net.parameters(), lr=0.005, momentum=0.9)
 
-for epoch in range(2):  # loop over the dataset multiple times
+for epoch in range(100):  # loop over the dataset multiple times
 
     running_loss = 0.0
     for i, data in enumerate(trainloader, 0):
@@ -76,10 +72,10 @@ for epoch in range(2):  # loop over the dataset multiple times
         inputs = data["features"]
         labels = data["target"]
 
-        print("inputs", np.shape(inputs))
-        print("labels", np.shape(labels))
+        # print("inputs", np.shape(inputs))
+        # print("labels", np.shape(labels))
 
-        print("=====")
+        # print("=====")
 
         # zero the parameter gradients
         optimizer.zero_grad()
@@ -87,8 +83,8 @@ for epoch in range(2):  # loop over the dataset multiple times
         # forward + backward + optimize
         outputs = net(inputs)
 
-        print("outputs", np.shape(outputs))
-        print("labels", np.shape(labels))
+        # print("outputs", np.shape(outputs))
+        # print("labels", np.shape(labels))
 
         loss = criterion(outputs, labels)
         loss.backward()
