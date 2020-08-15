@@ -1,1 +1,8 @@
+/backup-networks
 /modified-data
+/networks
+/original-data
+/temp-data
+/src/__pycache__
+/src/old
+/src/cifar_net.pth
