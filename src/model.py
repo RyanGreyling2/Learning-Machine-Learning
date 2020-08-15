@@ -9,15 +9,15 @@ from torch.utils.data import Dataset, DataLoader
 import pandas as pd   
 import numpy as np
 
-# trainset = torchvision.datasets.MNIST(root='./data', train=True, download=True, transform=transform)
 
 class TrainData(Dataset):
 
     def __init__(self, xlsx_file):
         data = pd.read_excel(xlsx_file)
         data = np.array(data)
-        data = np.delete(data, -2, 1)
+        # data = np.delete(data, -2, 1)
         self.features = data[::,:-1:].astype('float32')
+        print("NUM OF FEATURES: ", np.shape(self.features))
         self.target = data[::,-1].astype('int64')
 
     def __len__(self):
@@ -31,33 +31,25 @@ class TrainData(Dataset):
 
 batch_size = 1
 
-train_dataset = TrainData(xlsx_file='../original-data/Training-Data.xlsx')
+train_dataset = TrainData(xlsx_file='../modified-data/featureselected.xlsx')
 trainloader = DataLoader(dataset=train_dataset, batch_size=batch_size, shuffle=True)
-        
-
+    
 
 class Net(nn.Module):
-
     def __init__(self):
         super(Net, self).__init__()
-        # 1 input image channel, 6 output channels, 3x3 square convolution
-        # kernel
-        # self.conv1 = nn.Conv2d(1, 6, 3)
-        # self.conv2 = nn.Conv2d(6, 16, 3)
-        # an affine operation: y = Wx + b
-        self.fc1 = nn.Linear(30, 16)  # 6*6 from image dimension
-        self.fc2 = nn.Linear(16, 8)
-        self.fc3 = nn.Linear(8, 2)
+
+        self.fc1 = nn.Linear(16, 2)
+        # self.fc2 = nn.Linear(11, 7)
+        # self.fc3 = nn.Linear(7, 4)
+        # self.fc4 = nn.Linear(4, 2)
 
     def forward(self, x):
-        # Max pooling over a (2, 2) window
-        # x = F.max_pool2d(F.relu(self.conv1(x)), (2, 2))
-        # If the size is a square you can only specify a single number
-        # x = F.max_pool2d(F.relu(self.conv2(x)), 2)
-        # x = x.view(-1, self.num_flat_features(x))
-        x = F.relu(self.fc1(x))
-        x = F.relu(self.fc2(x))
-        x = torch.sigmoid(self.fc3(x))
+        # x = F.relu(self.fc1(x))
+        # x = F.relu(self.fc2(x))
+        # x = F.relu(self.fc3(x))
+        # # x = torch.sigmoid(self.fc3(x))
+        x = torch.sigmoid(self.fc1(x))
         return x
 
 net = Net()
@@ -99,5 +91,5 @@ for epoch in range(100):  # loop over the dataset multiple times
 
 print('Finished Training')
 
-PATH = './cifar_net.pth'
+PATH = '../networks/evaluate.pth'
 torch.save(net.state_dict(), PATH)

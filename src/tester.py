@@ -12,8 +12,9 @@ class TrainData(Dataset):
     def __init__(self, xlsx_file):
         data = pd.read_excel(xlsx_file)
         data = np.array(data)
-        data = np.delete(data, -2, 1)
+        # data = np.delete(data, -2, 1)
         self.features = data[::,:-1:].astype('float32')
+        print("NUM OF FEATURES: ", np.shape(self.features))
         self.target = data[::,-1].astype('int64')
 
     def __len__(self):
@@ -25,25 +26,26 @@ class TrainData(Dataset):
         # print("===")
         return sample
 
-test_dataset = TrainData(xlsx_file='../original-data/Training-Data.xlsx')
-
-classes = ('0', '1')
+test_dataset = TrainData(xlsx_file='../modified-data/featureselected.xlsx')
 
 class Net(nn.Module):
     def __init__(self):
         super(Net, self).__init__()
 
-        self.fc1 = nn.Linear(30, 16)
-        self.fc2 = nn.Linear(16, 8)
-        self.fc3 = nn.Linear(8, 2)
+        self.fc1 = nn.Linear(16, 2)
+        # self.fc2 = nn.Linear(11, 7)
+        # self.fc3 = nn.Linear(7, 4)
+        # self.fc4 = nn.Linear(4, 2)
 
     def forward(self, x):
-        x = F.relu(self.fc1(x))
-        x = F.relu(self.fc2(x))
-        x = torch.sigmoid(self.fc3(x))
+        # x = F.relu(self.fc1(x))
+        # x = F.relu(self.fc2(x))
+        # x = F.relu(self.fc3(x))
+        # # x = torch.sigmoid(self.fc3(x))
+        x = torch.sigmoid(self.fc1(x))
         return x
 
-PATH = './cifar_net.pth'
+PATH = '../networks/evaluate.pth'
 net = Net()
 net.load_state_dict(torch.load(PATH))
 
